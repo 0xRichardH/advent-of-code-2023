@@ -8,7 +8,8 @@ edition = "2021"
 
 [features]
 day01-part1 = []
-day01 = ["day01-part1"]
+day01-part2 = []
+day01 = ["day01-part1", "day01-part2"]
 
 [dependencies]
 anyhow = "1.0.75"
