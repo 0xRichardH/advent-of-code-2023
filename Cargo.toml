@@ -13,6 +13,7 @@ day01 = ["day01-part1", "day01-part2"]
 day02-part1 = []
 day02-part2 = []
 day02 = ["day02-part1", "day02-part2"]
+all = ["day01", "day02"]
 
 [dependencies]
 anyhow = "1.0.75"
