@@ -1,4 +1,4 @@
-use anyhow::Context;
+use anyhow::bail;
 
 use super::trie::TrieNode;
 
@@ -32,19 +32,24 @@ fn parse_numbers_from_str(trie: &TrieNode, input: &str) -> anyhow::Result<u32> {
 
             if c.is_alphabetic() {
                 tmp_alphabet.push(c);
-                let node_result = trie.search(&tmp_alphabet);
-                if node_result.is_none() {
-                    tmp_alphabet.clear();
-                    tmp_alphabet.push(c);
-                    return None;
-                }
 
-                if node_result.unwrap().is_end_of_word() {
-                    if let Some(num) = alphabet_to_number(tmp_alphabet.as_str()) {
-                        tmp_alphabet.clear();
-                        tmp_alphabet.push(c);
-                        return Some(num);
+                while !tmp_alphabet.is_empty() {
+                    let node_result = trie.search(&tmp_alphabet);
+                    if node_result.is_none() {
+                        tmp_alphabet.remove(0);
+                        continue;
                     }
+
+                    if node_result.unwrap().is_end_of_word() {
+                        if let Some(num) = alphabet_to_number(tmp_alphabet.as_str()) {
+                            tmp_alphabet.remove(0);
+                            return Some(num);
+                        }
+
+                        tmp_alphabet.remove(0);
+                    }
+
+                    break;
                 }
             }
 
@@ -52,23 +57,18 @@ fn parse_numbers_from_str(trie: &TrieNode, input: &str) -> anyhow::Result<u32> {
         })
         .collect::<Vec<u32>>();
 
-    let num_str = match numbers.len() {
+    match numbers.len() {
         1 => {
-            let num = numbers[0].to_string();
-            format!("{}{}", num, num)
+            let num = numbers[0];
+            Ok(num * 10 + num)
         }
         2.. => {
             let num1 = numbers[0];
             let num2 = numbers[numbers.len() - 1];
-            format!("{}{}", num1, num2)
+            Ok(num1 * 10 + num2)
         }
-        _ => String::new(),
-    };
-    let num = num_str
-        .parse::<u32>()
-        .context("parse number from string failed")?;
-
-    Ok(num)
+        _ => bail!("invalid numbers"),
+    }
 }
 
 fn alphabet_to_number(alphabet: &str) -> Option<u32> {
@@ -129,6 +129,16 @@ zoneight234
     #[case("4nineeightseven2", 42)]
     #[case("zoneight234", 14)]
     #[case("7pqrstsixteen", 76)]
+    #[case("onespnbfninetgqmtbdmr17pmjt", 17)]
+    #[case("94six8329", 99)]
+    #[case("7nineseven", 77)]
+    #[case("271", 21)]
+    #[case("8sevenseveneightvgfdkdglq89", 89)]
+    #[case("ntlznczfone7ninesixxtxbkvpkonebmbc", 11)]
+    /// this test case is from the real input
+    /// it tests two overlapping numbers
+    /// where the second number should succeed
+    #[case("fivezg8jmf6hrxnhgxxttwoneg", 51)]
     fn it_should_parse_numbers_from_str(#[case] input: &str, #[case] expected: u32) {
         let mut trie = TrieNode::new();
         for alphabet_num in ALPHABET_NUMBERS {
