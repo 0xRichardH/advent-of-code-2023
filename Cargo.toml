@@ -10,7 +10,11 @@ edition = "2021"
 day01-part1 = []
 day01-part2 = []
 day01 = ["day01-part1", "day01-part2"]
+day02-part1 = []
+day02-part2 = []
+day02 = ["day02-part1", "day02-part2"]
 
 [dependencies]
 anyhow = "1.0.75"
+regex = "1.10.2"
 rstest = "0.18.2"
