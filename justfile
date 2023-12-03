@@ -1,11 +1,11 @@
-test:
-  cargo nextest run
+test day:
+  cargo nextest run -- {{day}}
 
-watch-all-test:
-  cargo watch -x "nextest run"
+bench day:
+  cargo bench --bench {{day}}
 
-watch-test part:
-  cargo watch -x "nextest run -- {{part}}"
+watch day:
+  cargo watch -s "just test {{day}}" -s "just bench {{day}}"
 
 run feature:
   cargo run --features {{feature}}
