@@ -1,3 +1,6 @@
+test-all:
+  cargo nextest run
+
 test day:
   cargo nextest run -- {{day}}
 

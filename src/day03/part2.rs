@@ -46,65 +46,37 @@ fn get_symbol_position_of_part_num(
     (i, j): (usize, usize),
     schematic: &[Vec<char>],
 ) -> Option<(usize, usize)> {
-    // previous
-    if i > 0 {
-        let previous_line = &schematic[i - 1];
-        // up, up left, up right
-        if let Some(&c) = previous_line.get(j) {
-            if is_allowed_symbol(c) {
-                return Some((i - 1, j));
-            }
+    let base_positions = [
+        (1, -1),
+        (1, 0),
+        (1, 1),
+        (0, -1),
+        (0, 1),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+    ];
+
+    for (a, b) in base_positions {
+        let l = (i as i32) + a;
+        let r = (j as i32) + b;
+
+        if l < 0 || r < 0 {
+            continue;
         }
 
-        if j > 0 {
-            let c = previous_line[j - 1];
-            if is_allowed_symbol(c) {
-                return Some((i - 1, j - 1));
-            }
-        }
+        let l = l as usize;
+        let r = r as usize;
 
-        if let Some(&c) = previous_line.get(j + 1) {
-            if is_allowed_symbol(c) {
-                return Some((i - 1, j + 1));
-            }
+        let line_result = schematic.get(l);
+        if line_result.is_none() {
+            continue;
         }
-    }
+        let line = line_result.unwrap();
 
-    // current
-    let current_line = &schematic[i];
-    //  left
-    if j > 0 {
-        let c = current_line[j - 1];
-        if is_allowed_symbol(c) {
-            return Some((i, j - 1));
-        }
-    }
-    //  right
-    if let Some(&c) = current_line.get(j + 1) {
-        if is_allowed_symbol(c) {
-            return Some((i, j + 1));
-        }
-    }
-
-    // next
-    // down, down left, down right
-    if let Some(next_line) = schematic.get(i + 1) {
-        if let Some(&c) = next_line.get(j) {
+        if let Some(&c) = line.get(r) {
             if is_allowed_symbol(c) {
-                return Some((i + 1, j));
-            }
-        }
-
-        if j > 0 {
-            let c = next_line[j - 1];
-            if is_allowed_symbol(c) {
-                return Some((i + 1, j - 1));
-            }
-        }
-
-        if let Some(&c) = next_line.get(j + 1) {
-            if is_allowed_symbol(c) {
-                return Some((i + 1, j + 1));
+                return Some((l, r));
             }
         }
     }
