@@ -7,5 +7,8 @@ bench day:
 watch day:
   cargo watch -s "just test {{day}}" -s "just bench {{day}}"
 
+flamegraph feature:
+  cargo flamegraph --profile flamegraph --root --features {{feature}} -o flamegraphs/{{feature}}.svg
+
 run feature:
   cargo run --features {{feature}}

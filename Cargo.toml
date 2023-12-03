@@ -25,6 +25,10 @@ day03-part2 = []
 day03 = ["day03-part1", "day03-part2"]
 all = ["day01", "day02", "day03"]
 
+[profile.flamegraph]
+inherits = "release"
+debug = true
+
 [[bench]]
 name = "day01"
 harness = false

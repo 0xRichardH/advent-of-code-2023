@@ -7,5 +7,5 @@ https://adventofcode.com/2023
 ```
 brew install just
 cargo install cargo-nextest --locked
-
+cargo install flamegraph
 ```
