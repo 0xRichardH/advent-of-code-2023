@@ -2,11 +2,11 @@ use anyhow::{bail, Result};
 use regex::Regex;
 
 pub fn process_data(input: &str) -> Result<u32> {
-    input.lines().map(calcuate_points).sum()
+    let re = Regex::new(r"Card.+?\d?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
+    input.lines().map(|l| calcuate_points(&re, l)).sum()
 }
 
-fn calcuate_points(game: &str) -> Result<u32> {
-    let re = Regex::new(r"Card.+?\d?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
+fn calcuate_points(re: &Regex, game: &str) -> Result<u32> {
     if let Some(caps) = re.captures(game) {
         let winning_nums = caps["winning_nums"]
             .split_whitespace()
@@ -69,7 +69,8 @@ mod tests {
     #[case("Card  7: 57 93  4  6  2 34 18 80 99  9 |  9 53 58 19 35  6 46 87 86 36 59 17 26 54 39 52 99 20 69 18 25 30 34 41 42", 16)]
     #[case("Card   8:  2 15 17 11 64 59 45 41 61 19 |  4 36 62 43 94 41 24 25 13 83 97 86 61 90 67  7 15 58 18 19 38 17 49 52 37", 16)]
     fn it_calcuates_points(#[case] input: &str, #[case] expected: u32) {
-        assert_eq!(calcuate_points(input).unwrap(), expected);
+        let re = Regex::new(r"Card.+?\d?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?").unwrap();
+        assert_eq!(calcuate_points(&re, input).unwrap(), expected);
     }
 
     #[test]
