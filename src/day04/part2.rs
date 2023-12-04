@@ -5,7 +5,7 @@ use anyhow::Result;
 use regex::Regex;
 
 pub fn process_data(input: &str) -> anyhow::Result<u32> {
-    let re = Regex::new(r"Card.+?(?<card_no>\d)?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
+    let re = Regex::new(r"Card\s+(?<card_no>\d+)?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
     let mut scratchcards = HashMap::new();
 
     input
@@ -79,7 +79,24 @@ fn get_common_numbers_count(mut nums1: Vec<u32>, mut nums2: Vec<u32>) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
+
     use super::*;
+
+    #[rstest]
+    #[case("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53", 1, 4)]
+    #[case("Card  10: 10 74 58 71 57 35 34 96 77 18 | 14 27 22 18 70 42 56 94 76 74 85 73 61 34 88 45 39 64 35 87 90 58 91 75 54", 10, 5)]
+    fn it_collects_scratchcards(
+        #[case] input: &str,
+        #[case] expected_key: u32,
+        #[case] expected_value_count: usize,
+    ) {
+        let re = Regex::new(r"Card\s+(?<card_no>\d+)?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")
+            .unwrap();
+        let mut scratchcards = HashMap::new();
+        assert!(collect_scratchcards(&re, input, &mut scratchcards).is_ok());
+        assert_eq!(expected_value_count, scratchcards[&expected_key].len());
+    }
 
     #[test]
     fn it_processes_data() -> anyhow::Result<()> {
