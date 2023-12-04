@@ -8,7 +8,7 @@ fn main() {
 
 #[divan::bench]
 fn part1() {
-    part1::process_data(black_box(include_str!("../inputs/day03-input.txt")));
+    part1::process_data(black_box(include_str!("../inputs/day04-input.txt"))).unwrap();
 }
 
 // #[divan::bench]

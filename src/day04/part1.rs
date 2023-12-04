@@ -1,12 +1,12 @@
 use anyhow::{bail, Result};
 use regex::Regex;
 
-pub fn process_data(input: &str) -> u32 {
-    input.lines().flat_map(|l| calcuate_points(l).ok()).sum()
+pub fn process_data(input: &str) -> Result<u32> {
+    input.lines().map(calcuate_points).sum()
 }
 
 fn calcuate_points(game: &str) -> Result<u32> {
-    let re = Regex::new(r"Card \d+?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
+    let re = Regex::new(r"Card.+?\d?: (?<winning_nums>.+)? \| (?<owned_nums>.+)?")?;
     if let Some(caps) = re.captures(game) {
         let winning_nums = caps["winning_nums"]
             .split_whitespace()
@@ -16,7 +16,6 @@ fn calcuate_points(game: &str) -> Result<u32> {
             .split_whitespace()
             .flat_map(|s| s.parse())
             .collect::<Vec<u32>>();
-        dbg!(game);
         let winning_count = get_common_numbers_count(winning_nums, owned_nums);
 
         // The first match makes the card worth one point
@@ -35,8 +34,6 @@ fn get_common_numbers_count(mut nums1: Vec<u32>, mut nums2: Vec<u32>) -> u32 {
     nums1.sort();
     nums2.sort();
 
-    dbg!(&nums1, &nums2);
-
     let mut j = 0;
     let mut i = 0;
     let mut counter = 0u32;
@@ -45,7 +42,6 @@ fn get_common_numbers_count(mut nums1: Vec<u32>, mut nums2: Vec<u32>) -> u32 {
         match nums1[i].cmp(&nums2[j]) {
             std::cmp::Ordering::Less => i += 1,
             std::cmp::Ordering::Equal => {
-                // dbg!(nums1[i]);
                 i += 1;
                 j += 1;
                 counter += 1
@@ -70,6 +66,8 @@ mod tests {
     #[case("Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83", 1)]
     #[case("Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36", 0)]
     #[case("Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11", 0)]
+    #[case("Card  7: 57 93  4  6  2 34 18 80 99  9 |  9 53 58 19 35  6 46 87 86 36 59 17 26 54 39 52 99 20 69 18 25 30 34 41 42", 16)]
+    #[case("Card   8:  2 15 17 11 64 59 45 41 61 19 |  4 36 62 43 94 41 24 25 13 83 97 86 61 90 67  7 15 58 18 19 38 17 49 52 37", 16)]
     fn it_calcuates_points(#[case] input: &str, #[case] expected: u32) {
         assert_eq!(calcuate_points(input).unwrap(), expected);
     }
@@ -83,7 +81,8 @@ Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
 Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
 Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
-        );
+        )
+        .unwrap();
         assert_eq!(13, sum);
     }
 }
