@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use nom::{
     bytes::complete::take_until,
     character::complete::{self, line_ending, space1},
@@ -10,8 +10,8 @@ use nom::{
 use nom_supreme::{tag::complete::tag, ParserExt};
 
 pub fn process_data(input: &str) -> Result<u64> {
-    let (input, seeds) = parse_seeds(input).expect("Parse seeds failed");
-    let (_, maps) = parse_maps(input).expect("Parse maps failed");
+    let (input, seeds) = parse_seeds(input).map_err(|e| anyhow!("Failed to parse seeds: {}", e))?;
+    let (_, maps) = parse_maps(input).map_err(|e| anyhow!("Failed to parse maps: {}", e))?;
 
     let mut short_location = u64::MAX;
     seeds.into_iter().for_each(|seed| {
