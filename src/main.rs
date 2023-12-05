@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use advent_of_code_2023::*;
 
 fn main() -> anyhow::Result<()> {
@@ -24,6 +25,9 @@ fn main() -> anyhow::Result<()> {
 
     #[cfg(feature = "day04-part2")]
     run_day04_part2()?;
+
+    #[cfg(feature = "day05-part1")]
+    run_day05_part1()?;
 
     Ok(())
 }
@@ -93,5 +97,13 @@ fn run_day04_part2() -> anyhow::Result<()> {
     let input_strings = include_str!("../inputs/day04-input.txt");
     let result = day04::part2::process_data(input_strings)?;
     println!("daily04-part2 = {}", result); // 6189740
+    Ok(())
+}
+
+#[cfg(feature = "day05-part1")]
+fn run_day05_part1() -> anyhow::Result<()> {
+    let input_strings = include_str!("../inputs/day05-input.txt");
+    let result = day05::part1::process_data(input_strings)?;
+    println!("daily05-part1 = {}", result); // 486613012
     Ok(())
 }
