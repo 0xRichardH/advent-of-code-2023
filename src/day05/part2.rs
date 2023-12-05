@@ -14,10 +14,8 @@ pub fn process_data(input: &str) -> Result<u64> {
     let (_, maps) = parse_maps(input).expect("Parse maps failed");
 
     let mut short_location = u64::MAX;
-    seeds.into_iter().for_each(|seed_range| {
-        for seed in seed_range {
-            short_location = find_location(&maps, seed).min(short_location);
-        }
+    seeds.into_iter().for_each(|seed| {
+        short_location = find_location(&maps, seed).min(short_location);
     });
 
     Ok(short_location)
@@ -60,36 +58,51 @@ fn parse_maps(input: &str) -> IResult<&str, Vec<Vec<[Range<u64>; 2]>>> {
     Ok((input, maps))
 }
 
-fn find_location(maps: &[Vec<[Range<u64>; 2]>], seed: u64) -> u64 {
-    let mut location = seed;
+fn find_location(maps: &[Vec<[Range<u64>; 2]>], seed_range: Range<u64>) -> u64 {
+    let mut seeds = vec![seed_range];
     for map in maps {
-        for [src, dest] in map {
-            if src.contains(&location) {
-                let index = location - src.start;
-                location = dest.start + index;
-                break;
+        let mut new_seeds = Vec::new();
+        for seed in seeds {
+            let mut found = false;
+            for [src, dest] in map {
+                let os = seed.start.max(src.start);
+                let oe = seed.end.min(src.end);
+                if os < oe {
+                    // dbg!("========================", &seed, &src, s, e, &dest);
+                    let len = os - src.start;
+                    new_seeds.push(dest.start + len..dest.start + len + oe - os);
+                    if os > seed.start {
+                        new_seeds.push(seed.start..os);
+                    }
+                    if oe < seed.end {
+                        new_seeds.push(oe..seed.end);
+                    }
+                    found = true;
+                    // dbg!(&new_seeds);
+                    break;
+                }
+            }
+
+            if !found {
+                new_seeds.push(seed);
             }
         }
+        seeds = new_seeds;
     }
 
-    location
+    // dbg!(&seeds);
+    let mut min_location = seeds[0].start;
+    seeds.into_iter().for_each(|seed| {
+        if seed.start < min_location {
+            min_location = seed.start;
+        }
+    });
+    min_location
 }
 
 #[cfg(test)]
 mod tests {
-    use rstest::rstest;
-
     use super::*;
-
-    #[rstest]
-    #[case(79, 82)]
-    #[case(14, 43)]
-    #[case(55, 86)]
-    #[case(13, 35)]
-    fn it_should_find_location(#[case] seed: u64, #[case] expected_location: u64) {
-        let maps = get_maps_from_default_input();
-        assert_eq!(expected_location, find_location(&maps, seed));
-    }
 
     #[test]
     fn it_should_process_data() {
@@ -127,45 +140,5 @@ humidity-to-location map:
 60 56 37
 56 93 4";
         assert_eq!(46, process_data(input).unwrap());
-    }
-
-    fn get_maps_from_default_input() -> Vec<Vec<[Range<u64>; 2]>> {
-        let input = "seeds: 79 14 55 13
-
-seed-to-soil map:
-50 98 2
-52 50 48
-
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
-
-water-to-light map:
-88 18 7
-18 25 70
-
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4";
-
-        let (input, _) = parse_seeds(input).expect("Parse seeds failed");
-        let (_, maps) = parse_maps(input).expect("Parse maps failed");
-        maps
     }
 }
