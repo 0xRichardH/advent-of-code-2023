@@ -62,23 +62,21 @@ fn find_location(maps: &[Vec<[Range<u64>; 2]>], seed_range: Range<u64>) -> u64 {
     let mut seeds = vec![seed_range];
     for map in maps {
         let mut new_seeds = Vec::new();
-        for seed in seeds {
+        while let Some(seed) = seeds.pop() {
             let mut found = false;
             for [src, dest] in map {
                 let os = seed.start.max(src.start);
                 let oe = seed.end.min(src.end);
                 if os < oe {
-                    // dbg!("========================", &seed, &src, s, e, &dest);
-                    let len = os - src.start;
-                    new_seeds.push(dest.start + len..dest.start + len + oe - os);
+                    let sidx = os - src.start;
+                    new_seeds.push(dest.start + sidx..dest.start + sidx + oe - os);
                     if os > seed.start {
-                        new_seeds.push(seed.start..os);
+                        seeds.push(seed.start..os);
                     }
                     if oe < seed.end {
-                        new_seeds.push(oe..seed.end);
+                        seeds.push(oe..seed.end);
                     }
                     found = true;
-                    // dbg!(&new_seeds);
                     break;
                 }
             }
@@ -90,7 +88,6 @@ fn find_location(maps: &[Vec<[Range<u64>; 2]>], seed_range: Range<u64>) -> u64 {
         seeds = new_seeds;
     }
 
-    // dbg!(&seeds);
     let mut min_location = seeds[0].start;
     seeds.into_iter().for_each(|seed| {
         if seed.start < min_location {
