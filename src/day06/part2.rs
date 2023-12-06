@@ -6,6 +6,7 @@ use nom::{
     IResult, Parser,
 };
 use nom_supreme::{tag::complete::tag, ParserExt};
+use rayon::prelude::*;
 
 pub fn process_data(input: &str) -> Result<u64> {
     let (_, (time, distance)) =
@@ -34,13 +35,16 @@ fn parse_nums(input: &str) -> IResult<&str, String> {
 fn winning_ways_of_race(distance: u64, time: u64) -> u64 {
     let start = (distance as f64 / time as f64).ceil() as u64;
     let end = time - start;
-    (start..=end).fold(0, |acc, hold| {
-        if hold * (time - hold) > distance {
-            acc + 1
-        } else {
-            acc
-        }
-    })
+    (start..=end)
+        .into_par_iter()
+        .fold_with(0, |acc, hold| {
+            if hold * (time - hold) > distance {
+                acc + 1
+            } else {
+                acc
+            }
+        })
+        .sum()
 }
 
 #[cfg(test)]
