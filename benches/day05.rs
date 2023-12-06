@@ -13,5 +13,5 @@ fn part1() {
 
 #[divan::bench]
 fn part2() {
-    part2::process_data(black_box(include_str!("../inputs/day04-input.txt"))).unwrap();
+    part2::process_data(black_box(include_str!("../inputs/day05-input.txt"))).unwrap();
 }
