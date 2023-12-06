@@ -32,13 +32,15 @@ fn parse_nums(input: &str) -> IResult<&str, String> {
 }
 
 fn winning_ways_of_race(distance: u64, time: u64) -> u64 {
-    let mut counter = 0;
-    for hold in 1..time {
+    let start = (distance as f64 / time as f64).ceil() as u64;
+    let end = time - start;
+    (start..=end).fold(0, |acc, hold| {
         if hold * (time - hold) > distance {
-            counter += 1;
+            acc + 1
+        } else {
+            acc
         }
-    }
-    counter
+    })
 }
 
 #[cfg(test)]

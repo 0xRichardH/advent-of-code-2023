@@ -13,8 +13,8 @@ pub fn process_data(input: &str) -> Result<u32> {
 
     let margin_of_error = distances
         .into_iter()
-        .enumerate()
-        .map(|(idx, distance)| winning_ways_of_race(distance, times[idx]))
+        .zip(times)
+        .map(|(distance, time)| winning_ways_of_race(distance, time))
         .product::<u32>();
 
     Ok(margin_of_error)
@@ -33,13 +33,13 @@ fn parse_nums(input: &str) -> IResult<&str, Vec<u32>> {
 }
 
 fn winning_ways_of_race(distance: u32, time: u32) -> u32 {
-    let mut counter = 0;
-    for hold in 1..time {
+    (1..time).fold(0, |acc, hold| {
         if hold * (time - hold) > distance {
-            counter += 1;
+            acc + 1
+        } else {
+            acc
         }
-    }
-    counter
+    })
 }
 
 #[cfg(test)]
