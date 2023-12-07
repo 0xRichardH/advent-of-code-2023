@@ -8,21 +8,21 @@ use nom::{
     IResult, Parser,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Card {
-    A,
-    K,
-    Q,
-    J,
-    T,
-    Nine,
-    Eight,
-    Seven,
-    Six,
-    Five,
-    Four,
-    Three,
-    Two,
+    A = 14,
+    K = 13,
+    Q = 12,
+    J = 11,
+    T = 10,
+    Nine = 9,
+    Eight = 8,
+    Seven = 7,
+    Six = 6,
+    Five = 5,
+    Four = 4,
+    Three = 3,
+    Two = 2,
 }
 
 impl Card {
@@ -44,71 +44,18 @@ impl Card {
             _ => None,
         }
     }
-
-    fn rank(&self) -> u8 {
-        match self {
-            Card::A => 13,
-            Card::K => 12,
-            Card::Q => 11,
-            Card::J => 10,
-            Card::T => 9,
-            Card::Nine => 8,
-            Card::Eight => 7,
-            Card::Seven => 6,
-            Card::Six => 5,
-            Card::Five => 4,
-            Card::Four => 3,
-            Card::Three => 2,
-            Card::Two => 1,
-        }
-    }
 }
 
-impl PartialOrd for Card {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Card {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.rank().cmp(&other.rank())
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 enum HandsType {
-    FiveOfKind,  // AAAAA
-    FourOfKind,  // AA8AA
-    FullHouse,   // 23332
-    ThreeOfKind, // TTT98
-    TwoPair,     // 23432
-    OnePair,     // A23A4
-    HighCard,    // 23456
-    Invalid,
-}
-
-impl Eq for HandsType {}
-
-impl PartialEq for HandsType {
-    fn eq(&self, other: &Self) -> bool {
-        self.rank() == other.rank()
-    }
-}
-
-impl HandsType {
-    fn rank(&self) -> u8 {
-        match self {
-            HandsType::FiveOfKind => 7,
-            HandsType::FourOfKind => 6,
-            HandsType::FullHouse => 5,
-            HandsType::ThreeOfKind => 4,
-            HandsType::TwoPair => 3,
-            HandsType::OnePair => 2,
-            HandsType::HighCard => 1,
-            HandsType::Invalid => u8::MIN,
-        }
-    }
+    FiveOfKind = 7,  // AAAAA
+    FourOfKind = 6,  // AA8AA
+    FullHouse = 5,   // 23332
+    ThreeOfKind = 4, // TTT98
+    TwoPair = 3,     // 23432
+    OnePair = 2,     // A23A4
+    HighCard = 1,    // 23456
+    Invalid = 0,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -127,7 +74,7 @@ impl PartialOrd for Hand {
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
         // compare kind
-        match self.kind.rank().cmp(&other.kind.rank()) {
+        match self.kind.cmp(&other.kind) {
             Ordering::Equal => (),
             other => return other,
         }
@@ -147,12 +94,9 @@ impl Ord for Hand {
 
 impl Hand {
     fn new(cards: Vec<Card>, bid: u32) -> Self {
-        let mut frequency: HashMap<u8, usize> = HashMap::new();
+        let mut frequency: HashMap<&Card, usize> = HashMap::new();
         for card in cards.iter() {
-            frequency
-                .entry(card.rank())
-                .and_modify(|c| *c += 1)
-                .or_insert(1);
+            frequency.entry(card).and_modify(|c| *c += 1).or_insert(1);
         }
 
         let mut pattern = frequency.values().cloned().collect::<Vec<usize>>();
