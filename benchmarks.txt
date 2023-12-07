@@ -1,0 +1,38 @@
+
+running 53 tests
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+test result: ok. 0 passed; 0 failed; 53 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+day01     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  273.5 µs      │ 546.4 µs      │ 326.4 µs      │ 339.9 µs      │ 100     │ 100
+╰─ part2  375.7 µs      │ 671.1 µs      │ 473.8 µs      │ 477.9 µs      │ 100     │ 100
+
+day02     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  404.5 µs      │ 1.678 ms      │ 531.5 µs      │ 563.7 µs      │ 100     │ 100
+╰─ part2  261.6 µs      │ 437.2 µs      │ 296.5 µs      │ 297.2 µs      │ 100     │ 100
+
+day03     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  211.2 µs      │ 427.8 µs      │ 230.7 µs      │ 244 µs        │ 100     │ 100
+╰─ part2  194.2 µs      │ 393.2 µs      │ 225 µs        │ 237.5 µs      │ 100     │ 100
+
+day04     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  773.5 µs      │ 3.94 ms       │ 948 µs        │ 1.158 ms      │ 100     │ 100
+╰─ part2  803.6 µs      │ 851.2 µs      │ 808.2 µs      │ 810 µs        │ 100     │ 100
+
+day05     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  45.49 µs      │ 216.9 µs      │ 65.81 µs      │ 64.46 µs      │ 100     │ 100
+╰─ part2  71.99 µs      │ 121.1 µs      │ 87.95 µs      │ 86.09 µs      │ 100     │ 100
+
+day06     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  582.1 ns      │ 35.45 µs      │ 583.1 ns      │ 947.9 ns      │ 100     │ 100
+╰─ part2  1.962 ms      │ 6.05 ms       │ 2.113 ms      │ 2.446 ms      │ 100     │ 100
+
+day07     fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  302.2 µs      │ 379.9 µs      │ 306.7 µs      │ 311.7 µs      │ 100     │ 100
+╰─ part2  331.9 µs      │ 371.7 µs      │ 334.8 µs      │ 336.2 µs      │ 100     │ 100
+
