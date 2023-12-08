@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use nom::{
@@ -7,33 +7,35 @@ use nom::{
     sequence::{delimited, separated_pair, terminated, tuple},
     IResult, Parser,
 };
+use num::Integer;
 
 type NavigateMap<'a> = HashMap<&'a str, Vec<&'a str>>;
 
 pub fn process_data(input: &str) -> Result<usize> {
     let (input, guide) = parse_guide(input).map_err(|e| anyhow!("Failed to parse guide: {}", e))?;
-    let (_, (map, mut starts)) =
+    let (_, (map, starts)) =
         parse_navigate_map(input).map_err(|e| anyhow!("Failed to parse map: {}", e))?;
 
-    let mut guide = guide.chars().collect::<VecDeque<_>>();
-    let mut steps = 0;
-
-    while let Some(direction) = guide.pop_front() {
-        starts.iter_mut().for_each(|current| {
+    let mut steps_arr = Vec::with_capacity(starts.len());
+    starts.into_iter().for_each(|start| {
+        let mut current = start;
+        let mut counter = 0;
+        for direction in guide.chars().cycle() {
             let current_directions = &map[current];
-            *current = match direction {
+            current = match direction {
                 'L' => current_directions[0],
                 'R' => current_directions[1],
                 _ => current,
             };
-        });
-        steps += 1;
-
-        if starts.iter().all(|&c| is_end(c)) {
-            break;
+            counter += 1;
+            if is_end(current) {
+                break;
+            }
         }
-        guide.push_back(direction);
-    }
+        steps_arr.push(counter);
+    });
+
+    let steps = steps_arr.iter().fold(1, |acc, n| acc.lcm(n));
 
     Ok(steps)
 }

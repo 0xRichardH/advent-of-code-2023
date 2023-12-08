@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
 use nom::{
@@ -17,11 +17,11 @@ pub fn process_data(input: &str) -> Result<usize> {
     let (input, guide) = parse_guide(input).map_err(|e| anyhow!("Failed to parse guide: {}", e))?;
     let (_, map) = parse_navigate_map(input).map_err(|e| anyhow!("Failed to parse map: {}", e))?;
 
-    let mut guide = guide.chars().collect::<VecDeque<_>>();
+    let mut guide = guide.chars().cycle();
     let mut steps = 0;
 
     let mut current = CURRENT;
-    while let Some(direction) = guide.pop_front() {
+    while let Some(direction) = guide.next() {
         let current_directions = &map[current];
         current = match direction {
             'L' => current_directions[0],
@@ -32,7 +32,6 @@ pub fn process_data(input: &str) -> Result<usize> {
         if current == DESTINATION {
             break;
         }
-        guide.push_back(direction);
     }
 
     Ok(steps)
