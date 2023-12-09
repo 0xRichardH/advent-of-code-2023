@@ -19,7 +19,6 @@ fn extrapolate(histories: &[i32]) -> i32 {
 
     diffs
         .iter()
-        .rev()
         .flat_map(|nums| nums.last())
         .fold(0i32, |history, n| n + history)
 }

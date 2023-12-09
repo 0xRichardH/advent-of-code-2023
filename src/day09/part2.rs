@@ -17,7 +17,11 @@ fn extrapolate(histories: &[i32]) -> i32 {
     let mut diffs: Vec<Vec<i32>> = vec![histories.to_vec()];
     calculate_diffs(histories, &mut diffs);
 
-    diffs.iter().rev().flat_map(|nums| nums.last()).sum()
+    diffs
+        .iter()
+        .rev()
+        .flat_map(|nums| nums.first())
+        .fold(0, |acc, n| n - acc)
 }
 
 fn calculate_diffs(histories: &[i32], diffs: &mut Vec<Vec<i32>>) {
@@ -42,6 +46,6 @@ mod tests {
         let input = "0 3 6 9 12 15
 1 3 6 10 15 21
 10 13 16 21 30 45";
-        assert_eq!(114, process_data(input).unwrap());
+        assert_eq!(2, process_data(input).unwrap());
     }
 }
