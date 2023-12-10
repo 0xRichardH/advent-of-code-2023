@@ -58,20 +58,19 @@ pub fn process_data(input: &str) -> Result<u32> {
     }
 
     let positions = [
-        Direction::North.position(),
-        Direction::South.position(),
-        Direction::East.position(),
-        Direction::West.position(),
+        Direction::North,
+        Direction::South,
+        Direction::East,
+        Direction::West,
     ];
     let mut seen = vec![vec![false; tiles[0].len()]; tiles.len()];
 
     let start = start.unwrap();
     seen[start.0][start.1] = true;
     let steps = positions.iter().fold(0, |steps, p| {
+        let current = (start.0 as i32, start.1 as i32);
         let mut ss: Vec<(i32, i32)> = Vec::new();
-        ss.push((start.0 as i32, start.1 as i32));
-        let position = calculate_position((start.0 as i32, start.1 as i32), *p);
-        find_farthest_steps(position, &tiles, &mut ss, &mut seen);
+        find_farthest_steps(current, p, &tiles, &mut ss, &mut seen);
         steps.max(ss.len() as u32)
     });
 
@@ -79,12 +78,17 @@ pub fn process_data(input: &str) -> Result<u32> {
 }
 
 fn find_farthest_steps(
-    position: (i32, i32),
+    current: (i32, i32),
+    next_d: &Direction,
     tiles: &Vec<Vec<Tile>>,
     steps: &mut Vec<(i32, i32)>,
     seen: &mut Vec<Vec<bool>>,
 ) {
-    let (i, j) = position;
+    steps.push(current);
+
+    let (i, j) = calculate_position(current, next_d.position());
+
+    // if the i, j if overflowed, the pop
     if i < 0 || j < 0 {
         steps.pop();
         return;
@@ -96,28 +100,32 @@ fn find_farthest_steps(
         return;
     }
 
-    let tile = &tiles[i][j];
-    if let Tile::Direction([a, b]) = tile {
-        if seen[i][j] {
+    // Handle the tile
+    match &tiles[i][j] {
+        Tile::Ground => {
             steps.pop();
-            return;
         }
-        seen[i][j] = true;
-        steps.push(position);
+        Tile::Direction([a, b]) => {
+            if seen[i][j] {
+                steps.pop();
+                return;
+            }
+            seen[i][j] = true;
+            let new_current = (i as i32, j as i32);
 
-        let position_a = calculate_position(position, a.position());
-        steps.push(position_a);
-        find_farthest_steps(position_a, tiles, steps, seen);
-        let position_b = calculate_position(position, b.position());
-        steps.push(position_b);
-        find_farthest_steps(position_b, tiles, steps, seen);
+            // not being able to get back to the previous position
+            if calculate_position(new_current, a.position()) != current
+                && calculate_position(new_current, b.position()) != current
+            {
+                steps.pop();
+            }
+
+            // recursion: go to next directions
+            find_farthest_steps(new_current, a, tiles, steps, seen);
+            find_farthest_steps(new_current, b, tiles, steps, seen);
+        }
+        _ => (),
     }
-
-    if let Tile::Start = tile {
-        return;
-    }
-
-    steps.pop();
 }
 
 fn calculate_position(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {
