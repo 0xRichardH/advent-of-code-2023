@@ -5,7 +5,7 @@ enum Tile {
     Ground,
     Start,
     Direction([Direction; 2]),
-    Invalid,
+    _Invalid,
 }
 
 #[derive(Debug)]
@@ -47,7 +47,7 @@ pub fn process_data(input: &str) -> Result<u32> {
                     'J' => Tile::Direction([Direction::North, Direction::West]),
                     '7' => Tile::Direction([Direction::South, Direction::West]),
                     'F' => Tile::Direction([Direction::South, Direction::East]),
-                    _ => Tile::Invalid,
+                    _ => Tile::_Invalid,
                 })
                 .collect::<Vec<Tile>>()
         })
@@ -68,12 +68,11 @@ pub fn process_data(input: &str) -> Result<u32> {
     let start = start.unwrap();
     seen[start.0][start.1] = true;
     let steps = positions.iter().fold(0, |steps, p| {
+        let mut ss: Vec<(i32, i32)> = Vec::new();
+        ss.push((start.0 as i32, start.1 as i32));
         let position = calculate_position((start.0 as i32, start.1 as i32), *p);
-        if let Some(s) = find_farthest_steps(position, &tiles, 0, &mut seen, start) {
-            steps.max(s)
-        } else {
-            steps
-        }
+        find_farthest_steps(position, &tiles, &mut ss, &mut seen);
+        steps.max(ss.len() as u32)
     });
 
     Ok(steps / 2)
@@ -82,42 +81,43 @@ pub fn process_data(input: &str) -> Result<u32> {
 fn find_farthest_steps(
     position: (i32, i32),
     tiles: &Vec<Vec<Tile>>,
-    mut steps: u32,
+    steps: &mut Vec<(i32, i32)>,
     seen: &mut Vec<Vec<bool>>,
-    init_position: (usize, usize),
-) -> Option<u32> {
+) {
     let (i, j) = position;
     if i < 0 || j < 0 {
-        return None;
+        steps.pop();
+        return;
     }
     let (i, j) = (i as usize, j as usize);
 
-    if i == init_position.0 && j == init_position.1 {
-        return Some(steps + 1);
-    }
-
     if i >= tiles.len() || j >= tiles[0].len() {
-        return None;
+        steps.pop();
+        return;
     }
 
-    let tile = tiles.get(i)?.get(j)?;
+    let tile = &tiles[i][j];
     if let Tile::Direction([a, b]) = tile {
-        steps += 1;
         if seen[i][j] {
-            return Some(steps);
+            steps.pop();
+            return;
         }
         seen[i][j] = true;
+        steps.push(position);
 
         let position_a = calculate_position(position, a.position());
-        let steps_a = find_farthest_steps(position_a, tiles, steps, seen, init_position)?;
-
+        steps.push(position_a);
+        find_farthest_steps(position_a, tiles, steps, seen);
         let position_b = calculate_position(position, b.position());
-        let steps_b = find_farthest_steps(position_b, tiles, steps, seen, init_position)?;
-
-        return Some(steps_a.max(steps_b));
+        steps.push(position_b);
+        find_farthest_steps(position_b, tiles, steps, seen);
     }
 
-    None
+    if let Tile::Start = tile {
+        return;
+    }
+
+    steps.pop();
 }
 
 fn calculate_position(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {

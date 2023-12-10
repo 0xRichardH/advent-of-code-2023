@@ -214,6 +214,6 @@ fn run_day09_part2() -> anyhow::Result<()> {
 fn run_day10_part1() -> anyhow::Result<()> {
     let input_strings = include_str!("../inputs/day10-input.txt");
     let result = day10::part1::process_data(input_strings)?;
-    println!("daily10-part1 = {}", result); // 245
+    println!("daily10-part1 = {}", result); // 7066
     Ok(())
 }
