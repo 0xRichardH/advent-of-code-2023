@@ -69,9 +69,11 @@ pub fn process_data(input: &str) -> Result<u32> {
     seen[start.0][start.1] = true;
     let steps = positions.iter().fold(0, |steps, p| {
         let position = calculate_position((start.0 as i32, start.1 as i32), *p);
-        let s = find_farthest_steps(position, &tiles, 0, &mut seen, start);
-        println!("xxxxxxxxxxxxxxxxxxxxxxxx {} xxxxxxxxxxxxxxxxxxxxxx", s);
-        steps.max(s)
+        if let Some(s) = find_farthest_steps(position, &tiles, 0, &mut seen, start) {
+            steps.max(s)
+        } else {
+            steps
+        }
     });
 
     Ok(steps / 2)
@@ -80,49 +82,42 @@ pub fn process_data(input: &str) -> Result<u32> {
 fn find_farthest_steps(
     position: (i32, i32),
     tiles: &Vec<Vec<Tile>>,
-    steps: u32,
+    mut steps: u32,
     seen: &mut Vec<Vec<bool>>,
     init_position: (usize, usize),
-) -> u32 {
-    let mut steps = steps;
+) -> Option<u32> {
     let (i, j) = position;
     if i < 0 || j < 0 {
-        return steps;
+        return None;
     }
     let (i, j) = (i as usize, j as usize);
 
     if i == init_position.0 && j == init_position.1 {
-        return steps + 1;
+        return Some(steps + 1);
     }
 
     if i >= tiles.len() || j >= tiles[0].len() {
-        return steps;
-    }
-    if seen[i][j] {
-        return steps;
-    }
-    seen[i][j] = true;
-
-    let some_tiles = tiles.get(i);
-    if some_tiles.is_none() {
-        return steps;
+        return None;
     }
 
-    let tile = some_tiles.unwrap().get(j);
-    if tile.is_none() {
-        return steps;
-    }
-
-    if let Tile::Direction([a, b]) = tile.unwrap() {
+    let tile = tiles.get(i)?.get(j)?;
+    if let Tile::Direction([a, b]) = tile {
         steps += 1;
+        if seen[i][j] {
+            return Some(steps);
+        }
+        seen[i][j] = true;
+
         let position_a = calculate_position(position, a.position());
+        let steps_a = find_farthest_steps(position_a, tiles, steps, seen, init_position)?;
+
         let position_b = calculate_position(position, b.position());
-        let steps_a = find_farthest_steps(position_a, tiles, steps, seen, init_position);
-        let steps_b = find_farthest_steps(position_b, tiles, steps, seen, init_position);
-        steps = steps_a.max(steps_b);
+        let steps_b = find_farthest_steps(position_b, tiles, steps, seen, init_position)?;
+
+        return Some(steps_a.max(steps_b));
     }
 
-    steps
+    None
 }
 
 fn calculate_position(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {
