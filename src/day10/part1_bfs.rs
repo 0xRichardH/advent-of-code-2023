@@ -67,7 +67,6 @@ pub fn process_data(input: &str) -> Result<u32> {
         bail!("start not found");
     }
     let start = start.unwrap();
-    let start_tile = Tile::Start(start);
 
     let mut seen = vec![vec![false; tiles[0].len()]; tiles.len()];
     let mut prev: Vec<(usize, usize)> = Vec::new();
@@ -81,7 +80,7 @@ pub fn process_data(input: &str) -> Result<u32> {
         }
         if let Tile::Direction([d1, d2]) = &tiles[i as usize][j as usize] {
             if is_direction_linked(direction, d1) || is_direction_linked(direction, d2) {
-                queue.push_back((start_tile.clone(), i, j));
+                queue.push_back((Tile::Start(start), i, j));
             }
         }
     });
@@ -145,13 +144,6 @@ fn walk(
     seen[i][j] = true;
 
     let tile = &tiles[i][j];
-
-    if let &Tile::Start((i, j)) = tile {
-        let (i, j) = (i as usize, j as usize);
-        prev.push((i, j));
-        return;
-    }
-
     if let Tile::Direction([d1, d2]) = tile {
         if is_linked(d1, &prev_title, (i as i32, j as i32))
             || is_linked(d2, &prev_title, (i as i32, j as i32))
