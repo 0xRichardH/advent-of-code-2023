@@ -11,7 +11,10 @@ fn part1() {
     part1::process_data(black_box(include_str!("../inputs/day11-input.txt")));
 }
 
-// #[divan::bench]
-// fn part2() {
-//     part2::process_data(black_box(include_str!("../inputs/day11-input.txt"))).unwrap();
-// }
+#[divan::bench]
+fn part2() {
+    part2::process_data(
+        black_box(include_str!("../inputs/day11-input.txt")),
+        1000000,
+    );
+}
