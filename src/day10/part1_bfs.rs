@@ -124,7 +124,7 @@ fn is_direction_linked(d1: &Direction, d2: &Direction) -> bool {
 
 fn walk(
     tiles: &[Vec<Tile>],
-    seen: &mut Vec<Vec<bool>>,
+    seen: &mut [Vec<bool>],
     prev: &mut Vec<(usize, usize)>,
     queue: &mut VecDeque<(Tile, i32, i32)>,
 ) {
