@@ -69,10 +69,10 @@ pub fn process_data(input: &str) -> Result<u32> {
     let start = start.unwrap();
 
     let mut seen = vec![vec![false; tiles[0].len()]; tiles.len()];
-    let mut prev: Vec<(usize, usize)> = Vec::new();
+    let mut prev: Vec<Vec<Option<(usize, usize)>>> = vec![vec![None; tiles[0].len()]; tiles.len()];
     let mut queue = VecDeque::<(Tile, i32, i32)>::new();
     seen[start.0 as usize][start.1 as usize] = true;
-    prev.push((start.0 as usize, start.1 as usize));
+    prev[start.0 as usize][start.1 as usize] = Some((start.0 as usize, start.1 as usize));
     DIRECTION_VECTORS.iter().for_each(|direction| {
         let (i, j) = calculate_position(start, direction.position());
         if is_overflowed(i, j, &tiles) {
@@ -95,7 +95,7 @@ pub fn process_data(input: &str) -> Result<u32> {
         .map(|(i, line)| {
             line.iter()
                 .enumerate()
-                .filter(|(j, _)| !prev.contains(&(i, *j)))
+                .filter(|(j, _)| prev[i][*j].is_none())
                 .filter(|(j, _)| {
                     let inversions_count = count_inversions((i, *j), &tiles, &prev);
                     inversions_count % 2 == 1
@@ -108,11 +108,15 @@ pub fn process_data(input: &str) -> Result<u32> {
 }
 
 // Count the number of "inversions" in a row
-fn count_inversions((i, j): (usize, usize), tiles: &[Vec<Tile>], prev: &[(usize, usize)]) -> u32 {
+fn count_inversions(
+    (i, j): (usize, usize),
+    tiles: &[Vec<Tile>],
+    prev: &[Vec<Option<(usize, usize)>>],
+) -> u32 {
     tiles[i][..j]
         .iter()
         .enumerate()
-        .filter(|(idx, _)| prev.contains(&(i, *idx)))
+        .filter(|(idx, _)| prev[i][*idx].is_some())
         .fold(0, |acc, (_idx, t)| {
             if let Tile::Direction([d1, d2]) = t {
                 if d1 == &Direction::North || d2 == &Direction::North {
@@ -156,7 +160,7 @@ fn is_direction_linked(d1: &Direction, d2: &Direction) -> bool {
 fn walk(
     tiles: &[Vec<Tile>],
     seen: &mut [Vec<bool>],
-    prev: &mut Vec<(usize, usize)>,
+    prev: &mut [Vec<Option<(usize, usize)>>],
     queue: &mut VecDeque<(Tile, i32, i32)>,
 ) {
     let position = queue.pop_front();
@@ -180,7 +184,7 @@ fn walk(
         if is_linked(d1, &prev_title, (i as i32, j as i32))
             || is_linked(d2, &prev_title, (i as i32, j as i32))
         {
-            prev.push((i, j));
+            prev[i][j] = Some((i, j));
             let (a, b) = calculate_position((i as i32, j as i32), d1.position());
             queue.push_back((tile.clone(), a, b));
             let (a, b) = calculate_position((i as i32, j as i32), d2.position());

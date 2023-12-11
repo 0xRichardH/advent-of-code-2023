@@ -236,6 +236,6 @@ fn run_day10_part1_bfs() -> anyhow::Result<()> {
 fn run_day10_part2() -> anyhow::Result<()> {
     let input_strings = include_str!("../inputs/day10-input.txt");
     let result = day10::part2::process_data(input_strings)?;
-    println!("daily10-part2 = {}", result); //
+    println!("daily10-part2 = {}", result); // 401
     Ok(())
 }
