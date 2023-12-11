@@ -46,8 +46,9 @@ day09-part1 = []
 day09-part2 = []
 day09 = ["day09-part1", "day09-part2"]
 day10-part1 = []
+day10-part1-bfs = []
 day10-part2 = []
-day10 = ["day10-part1", "day10-part2"]
+day10 = ["day10-part1", "day10-part1-bfs", "day10-part2"]
 all = [
   "day01",
   "day02",
