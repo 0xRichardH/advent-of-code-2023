@@ -270,7 +270,7 @@ fn run_day11_part2() {
 fn run_day12_part1() -> anyhow::Result<()> {
     let input_strings = include_str!("../inputs/day12-input.txt");
     let result = day12::part1::process_data(input_strings)?;
-    println!("daily12-part1 = {}", result); //
+    println!("daily12-part1 = {}", result); // 7857
     Ok(())
 }
 
@@ -278,6 +278,6 @@ fn run_day12_part1() -> anyhow::Result<()> {
 fn run_day12_part2() -> anyhow::Result<()> {
     let input_strings = include_str!("../inputs/day12-input.txt");
     let result = day12::part2::process_data(input_strings)?;
-    println!("daily12-part2 = {}", result); //
+    println!("daily12-part2 = {}", result); // 28606137449920
     Ok(())
 }

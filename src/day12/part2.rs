@@ -78,17 +78,6 @@ fn count_arrangement(
             return acc;
         }
 
-        if nums_idx >= nums.len() {
-            return count_arrangement(
-                record,
-                nums,
-                record_idx + 1,
-                nums_idx,
-                current_hashtag_count,
-                dp_mem,
-            );
-        }
-
         let counter = match c {
             '.' => {
                 if current_hashtag_count == 0 || nums_idx >= nums.len() {
@@ -108,14 +97,20 @@ fn count_arrangement(
 
                 return acc;
             }
-            '#' => count_arrangement(
-                record,
-                nums,
-                record_idx + 1,
-                nums_idx,
-                current_hashtag_count + 1,
-                dp_mem,
-            ),
+            '#' => {
+                if nums_idx >= nums.len() {
+                    return acc;
+                }
+
+                count_arrangement(
+                    record,
+                    nums,
+                    record_idx + 1,
+                    nums_idx,
+                    current_hashtag_count + 1,
+                    dp_mem,
+                )
+            }
             _ => acc,
         };
 
