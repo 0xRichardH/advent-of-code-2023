@@ -6,10 +6,12 @@ fn main() {
     divan::main();
 }
 
-#[divan::bench]
-fn part1() {
-    part1::process_data(black_box(include_str!("../inputs/day12-input.txt"))).unwrap();
-}
+// skip because it's too slow
+// which is using brutal force
+// #[divan::bench]
+// fn part1() {
+//     part1::process_data(black_box(include_str!("../inputs/day12-input.txt"))).unwrap();
+// }
 
 // #[divan::bench]
 // fn part2() {

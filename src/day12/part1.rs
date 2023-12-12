@@ -8,6 +8,7 @@ use nom::{
     IResult, Parser,
 };
 
+/// brutal force
 pub fn process_data(input: &str) -> Result<u32> {
     input.lines().try_fold(0u32, |acc, line| {
         calculate_arrangement(line).map(|x| acc + x)
