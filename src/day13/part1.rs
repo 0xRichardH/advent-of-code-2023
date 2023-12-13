@@ -1,3 +1,5 @@
+use crate::utils::transpose;
+
 pub fn process_data(input: &str) -> u32 {
     let patterns = parse_patterns(input);
     patterns.iter().fold(0, |acc, pattern| {
@@ -30,13 +32,6 @@ fn get_mirror_count(pattern: &[Vec<char>]) -> usize {
         }
     }
     0
-}
-
-fn transpose<T: Copy>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
-    let len = v[0].len();
-    (0..len)
-        .map(|i| v.iter().map(|row| row[i]).collect())
-        .collect()
 }
 
 // 123456789
