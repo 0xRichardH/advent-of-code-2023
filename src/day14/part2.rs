@@ -1,17 +1,55 @@
+use crate::utils::matrix::display_grid;
+
+const CYCLE: u32 = 1000000000;
+
 pub fn process_data(input: &str) -> u32 {
     let mut platforms = input
         .lines()
         .map(|l| l.chars().collect::<Vec<char>>())
         .collect::<Vec<Vec<char>>>();
-    calculate_total_load(&mut platforms)
+
+    let mut result = 0;
+    for _ in 0..1000 {
+        cycle(&mut platforms);
+        result = score(&platforms);
+    }
+
+    result
 }
 
-fn calculate_total_load(platforms: &mut [Vec<char>]) -> u32 {
+fn cycle(platforms: &mut Vec<Vec<char>>) {
+    // 1 north
+    roll(platforms);
+
+    // 2 west
+    rotate_right(platforms);
+    roll(platforms);
+    rotate_left(platforms);
+
+    // 3 south
+    rotate_180(platforms);
+    roll(platforms);
+    rotate_180(platforms);
+
+    // 4 east
+    rotate_left(platforms);
+    roll(platforms);
+    rotate_right(platforms);
+}
+
+fn roll(platforms: &mut [Vec<char>]) {
+    let row_len = platforms[0].len();
+
+    for j in 0..row_len {
+        switch(platforms, (0, j), None);
+    }
+}
+
+fn score(platforms: &[Vec<char>]) -> u32 {
     let len = platforms.len();
     let row_len = platforms[0].len();
 
     (0..row_len).fold(0, |total_load, j| {
-        switch(platforms, (0, j), None);
         (0..len).fold(total_load, |load, i| {
             if platforms[i][j] == 'O' {
                 load + len - i
@@ -20,6 +58,29 @@ fn calculate_total_load(platforms: &mut [Vec<char>]) -> u32 {
             }
         })
     }) as u32
+}
+
+fn rotate_left(platforms: &mut Vec<Vec<char>>) {
+    let len = platforms[0].len();
+    *platforms = (0..len)
+        .rev()
+        .map(|i| platforms.iter().map(|v| v[i]).collect())
+        .collect();
+}
+
+fn rotate_right(platforms: &mut Vec<Vec<char>>) {
+    let len = platforms.len();
+    *platforms = (0..len)
+        .map(|i| platforms.iter().rev().map(|v| v[i]).collect())
+        .collect();
+}
+
+fn rotate_180(platforms: &mut Vec<Vec<char>>) {
+    platforms.reverse();
+
+    for row in platforms.iter_mut() {
+        row.reverse();
+    }
 }
 
 fn switch(platforms: &mut [Vec<char>], (i, j): (usize, usize), dot: Option<(usize, usize)>) {
@@ -68,6 +129,6 @@ O.#..O.#.#
 .......O..
 #....###..
 #OO..#....";
-        assert_eq!(136, process_data(input));
+        assert_eq!(64, process_data(input));
     }
 }
