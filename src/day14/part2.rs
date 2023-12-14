@@ -26,10 +26,16 @@ pub fn process_data(input: &str) -> u32 {
         }
     }
 
+    // the number of unique states (*v == 1) before the start of the repeating pattern.
     let offset = pattern.values().filter(|&v| *v == 1).count();
+    // the length of the repeating pattern, determined by counting the states that appear more than once
     let cycle_length = pattern.values().filter(|v| **v > 1).count();
 
+    // index calculation
+    // (CYCLE - offset - 1) adjusts the cycle number to account for the initial unique states (the offset) and aligns the cycle count to a 0-based index.
+    // The modulo operation % cycle_length is used to find the position within the repeating cycle.
     let index = (CYCLE - offset - 1) % cycle_length;
+
     scores[offset + index]
 }
 
