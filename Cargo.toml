@@ -58,6 +58,9 @@ day12 = ["day12-part1", "day12-part2"]
 day13-part1 = []
 day13-part2 = []
 day13 = ["day13-part1", "day13-part2"]
+day14-part1 = []
+day14-part2 = []
+day14 = ["day14-part1", "day14-part2"]
 all = [
   "day01",
   "day02",
@@ -72,6 +75,7 @@ all = [
   "day11",
   "day12",
   "day13",
+  "day14",
 ]
 
 [profile.flamegraph]
