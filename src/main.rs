@@ -295,19 +295,19 @@ fn run_day12_part2() -> anyhow::Result<()> {
 fn run_day13_part1() {
     let input_strings = include_str!("../inputs/day13-input.txt");
     let result = day13::part1::process_data(input_strings);
-    println!("daily13-part1 = {}", result); // 0
+    println!("daily13-part1 = {}", result); // 37113
 }
 
 #[cfg(feature = "day13-part2")]
 fn run_day13_part2() {
     let input_strings = include_str!("../inputs/day13-input.txt");
     let result = day13::part2::process_data(input_strings);
-    println!("daily13-part2 = {}", result); // 0
+    println!("daily13-part2 = {}", result); // 30449
 }
 
 #[cfg(feature = "day14-part1")]
 fn run_day14_part1() {
     let input_strings = include_str!("../inputs/day14-input.txt");
     let result = day14::part1::process_data(input_strings);
-    println!("daily14-part1 = {}", result); // 0
+    println!("daily14-part1 = {}", result); // 109654
 }

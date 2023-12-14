@@ -10,18 +10,16 @@ fn calculate_total_load(platforms: &mut [Vec<char>]) -> u32 {
     let len = platforms.len();
     let row_len = platforms[0].len();
 
-    let mut total = 0;
-    for j in 0..row_len {
+    (0..row_len).fold(0, |total_load, j| {
         switch(platforms, (0, j), None);
-
-        for i in 0..len {
+        (0..len).fold(total_load, |load, i| {
             if platforms[i][j] == 'O' {
-                total += len - i;
+                load + len - i
+            } else {
+                load
             }
-        }
-    }
-
-    total as u32
+        })
+    }) as u32
 }
 
 fn switch(platforms: &mut [Vec<char>], (i, j): (usize, usize), dot: Option<(usize, usize)>) {
@@ -41,21 +39,16 @@ fn switch(platforms: &mut [Vec<char>], (i, j): (usize, usize), dot: Option<(usiz
         return;
     }
 
-    if platforms[i][j] == '.' {
-        switch(platforms, (i + 1, j), dot);
-        return;
-    }
-
-    if platforms[i][j] == '#' {
-        switch(platforms, (i + 1, j), None);
-        return;
-    }
-
-    if platforms[i][j] == 'O' {
-        let (ai, bj) = dot.unwrap();
-        platforms[i][j] = '.';
-        platforms[ai][bj] = 'O';
-        switch(platforms, (ai + 1, bj), None);
+    match platforms[i][j] {
+        '.' => switch(platforms, (i + 1, j), dot),
+        '#' => switch(platforms, (i + 1, j), None),
+        'O' => {
+            let (ai, bj) = dot.unwrap();
+            platforms[i][j] = '.';
+            platforms[ai][bj] = 'O';
+            switch(platforms, (ai + 1, bj), None)
+        }
+        _ => (),
     }
 }
 
