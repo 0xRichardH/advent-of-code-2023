@@ -9,6 +9,17 @@ pub fn transpose<T: Copy + Send + Sync>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
         .collect()
 }
 
+pub fn display_grid<T>(grid: &Vec<Vec<T>>)
+where
+    T: std::fmt::Display,
+{
+    println!();
+    for row in grid {
+        println!("{}", row.iter().map(|n| n.to_string()).collect::<String>());
+    }
+    println!();
+}
+
 #[cfg(test)]
 mod tests {
     use rstest::rstest;
