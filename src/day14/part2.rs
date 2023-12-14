@@ -1,6 +1,6 @@
-use crate::utils::matrix::display_grid;
+use std::collections::HashMap;
 
-const CYCLE: u32 = 1000000000;
+const CYCLE: usize = 1000000000;
 
 pub fn process_data(input: &str) -> u32 {
     let mut platforms = input
@@ -8,13 +8,29 @@ pub fn process_data(input: &str) -> u32 {
         .map(|l| l.chars().collect::<Vec<char>>())
         .collect::<Vec<Vec<char>>>();
 
-    let mut result = 0;
+    let mut scores = Vec::new();
+    let mut pattern = HashMap::new();
     for _ in 0..1000 {
         cycle(&mut platforms);
-        result = score(&platforms);
+        scores.push(score(&platforms));
+        let pattern_key = platforms
+            .iter()
+            .map(|row| row.iter().collect::<String>())
+            .collect::<String>();
+        pattern
+            .entry(pattern_key.clone())
+            .and_modify(|e| *e += 1)
+            .or_insert(1);
+        if pattern[&pattern_key] > 2 {
+            break;
+        }
     }
 
-    result
+    let offset = pattern.values().filter(|&v| *v == 1).count();
+    let cycle_length = pattern.values().filter(|v| **v > 1).count();
+
+    let index = (CYCLE - offset - 1) % cycle_length;
+    scores[offset + index]
 }
 
 fn cycle(platforms: &mut Vec<Vec<char>>) {
