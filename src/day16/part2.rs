@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 const UP: (i32, i32) = (-1, 0);
@@ -33,20 +34,38 @@ pub fn process_data(input: &str) -> u64 {
 
     let mut counter = 0;
 
-    for x in 0..grid.len() {
-        counter = get_total_beams_count(&grid, (x as i32, 0), &Direction::Right).max(counter);
-        counter = get_total_beams_count(
-            &grid,
-            (x as i32, grid[0].len() as i32 - 1),
-            &Direction::Left,
-        )
-        .max(counter);
+    let counter_result = (0..grid.len())
+        .into_par_iter()
+        .map(|x| {
+            let (a, b) = rayon::join(
+                || get_total_beams_count(&grid, (x as i32, 0), &Direction::Right),
+                || {
+                    get_total_beams_count(
+                        &grid,
+                        (x as i32, grid[0].len() as i32 - 1),
+                        &Direction::Left,
+                    )
+                },
+            );
+            a.max(b)
+        })
+        .max();
+    if let Some(c) = counter_result {
+        counter = c.max(counter);
     }
 
-    for y in 0..grid[0].len() {
-        counter = get_total_beams_count(&grid, (0, y as i32), &Direction::Down).max(counter);
-        counter = get_total_beams_count(&grid, (grid.len() as i32 - 1, y as i32), &Direction::Up)
-            .max(counter);
+    let counter_result = (0..grid[0].len())
+        .into_par_iter()
+        .map(|y| {
+            let (a, b) = rayon::join(
+                || get_total_beams_count(&grid, (0, y as i32), &Direction::Down),
+                || get_total_beams_count(&grid, (grid.len() as i32 - 1, y as i32), &Direction::Up),
+            );
+            a.max(b)
+        })
+        .max();
+    if let Some(c) = counter_result {
+        counter = c.max(counter);
     }
 
     counter
