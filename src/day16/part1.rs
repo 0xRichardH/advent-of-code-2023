@@ -7,11 +7,12 @@ const DOWN: (i32, i32) = (1, 0);
 const LEFT: (i32, i32) = (0, -1);
 const RIGHT: (i32, i32) = (0, 1);
 
+#[derive(PartialEq, Eq, Hash, Clone)]
 enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
+    Up = 0,
+    Down = 1,
+    Left = 2,
+    Right = 3,
 }
 
 impl Direction {
@@ -34,9 +35,17 @@ pub fn process_data(input: &str) -> u64 {
     display_grid(&grid);
 
     let mut seen = HashSet::new();
+    let mut direction_seen = HashSet::new();
     let start = (0, 0);
     seen.insert(start);
-    walk(&grid, start, &Direction::Right, &mut seen);
+    direction_seen.insert((start, Direction::Right));
+    walk(
+        &grid,
+        start,
+        &Direction::Right,
+        &mut seen,
+        &mut direction_seen,
+    );
 
     // debug
     let mut test = vec![vec!['.'; grid[0].len()]; grid.len()];
@@ -44,6 +53,8 @@ pub fn process_data(input: &str) -> u64 {
         test[*x as usize][*y as usize] = '#';
     }
     display_grid(&test);
+
+    dbg!(direction_seen.len());
 
     seen.len() as u64
 }
@@ -53,6 +64,7 @@ fn walk(
     current: (i32, i32),
     direction: &Direction,
     seen: &mut HashSet<(i32, i32)>,
+    d_seen: &mut HashSet<((i32, i32), Direction)>,
 ) {
     // validate index bounds
     let next = direction.next(current);
@@ -71,12 +83,8 @@ fn walk(
     }
     let tile = tile.unwrap();
 
-    // seen
-    let mut is_first_seen = false;
-    if !seen.contains(&next) {
-        is_first_seen = true;
-        seen.insert(next);
-    }
+    // seen (beam)
+    seen.insert(next);
 
     // get the next direction
     let mut directions = Vec::with_capacity(2);
@@ -114,11 +122,12 @@ fn walk(
     }
 
     for d in directions {
-        if !is_first_seen && seen.contains(&d.next(next)) {
-            // already seen in this direction
+        let d_seen_key = (next, d.clone());
+        if d_seen.contains(&d_seen_key) {
             continue;
         }
-        walk(grid, next, d, seen);
+        d_seen.insert(d_seen_key);
+        walk(grid, next, d, seen, d_seen);
     }
 }
 
