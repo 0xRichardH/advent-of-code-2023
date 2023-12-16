@@ -1,7 +1,5 @@
 use std::collections::HashSet;
 
-use crate::utils::matrix::display_grid;
-
 const UP: (i32, i32) = (-1, 0);
 const DOWN: (i32, i32) = (1, 0);
 const LEFT: (i32, i32) = (0, -1);
@@ -32,13 +30,11 @@ pub fn process_data(input: &str) -> u64 {
         .lines()
         .map(|l| l.chars().collect::<Vec<char>>())
         .collect::<Vec<_>>();
-    display_grid(&grid);
+    // display_grid(&grid);
 
     let mut seen = HashSet::new();
     let mut direction_seen = HashSet::new();
     let start = (0, 0);
-    seen.insert(start);
-    direction_seen.insert((start, Direction::Right));
     walk(
         &grid,
         start,
@@ -48,26 +44,23 @@ pub fn process_data(input: &str) -> u64 {
     );
 
     // debug
-    let mut test = vec![vec!['.'; grid[0].len()]; grid.len()];
-    for (x, y) in seen.iter() {
-        test[*x as usize][*y as usize] = '#';
-    }
-    display_grid(&test);
-
-    dbg!(direction_seen.len());
+    // let mut test = vec![vec!['.'; grid[0].len()]; grid.len()];
+    // for (x, y) in seen.iter() {
+    //     test[*x as usize][*y as usize] = '#';
+    // }
+    // display_grid(&test);
 
     seen.len() as u64
 }
 
 fn walk(
     grid: &[Vec<char>],
-    current: (i32, i32),
+    next: (i32, i32),
     direction: &Direction,
     seen: &mut HashSet<(i32, i32)>,
     d_seen: &mut HashSet<((i32, i32), Direction)>,
 ) {
     // validate index bounds
-    let next = direction.next(current);
     if next.0 < 0 || next.1 < 0 {
         return;
     }
@@ -83,8 +76,13 @@ fn walk(
     }
     let tile = tile.unwrap();
 
-    // seen (beam)
+    // seen
     seen.insert(next);
+    let d_seen_key = (next, direction.clone());
+    if d_seen.contains(&d_seen_key) {
+        return;
+    }
+    d_seen.insert(d_seen_key);
 
     // get the next direction
     let mut directions = Vec::with_capacity(2);
@@ -122,11 +120,7 @@ fn walk(
     }
 
     for d in directions {
-        let d_seen_key = (next, d.clone());
-        if d_seen.contains(&d_seen_key) {
-            continue;
-        }
-        d_seen.insert(d_seen_key);
+        let next = d.next(next);
         walk(grid, next, d, seen, d_seen);
     }
 }
