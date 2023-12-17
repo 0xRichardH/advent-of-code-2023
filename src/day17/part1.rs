@@ -11,6 +11,8 @@ const DIRECTIONS: [(isize, isize); 4] = [UP, DOWN, LEFT, RIGHT];
 struct State {
     heat: usize,
     position: (usize, usize),
+    direction: (isize, isize),
+    direction_counter: usize,
 }
 
 impl Ord for State {
@@ -50,16 +52,21 @@ fn find_shortest_path(
     pq.push(State {
         heat: 0,
         position: starting_point,
+        direction: RIGHT,
+        direction_counter: 1,
     });
     distance[starting_point.0][starting_point.1] = 0;
 
     let grid_x_len = grid.len() as isize;
     let grid_y_len = grid[0].len() as isize;
 
-    let mut prev_direction = RIGHT;
-    let mut prev_direction_counter = 1;
-
-    while let Some(State { heat, position }) = pq.pop() {
+    while let Some(State {
+        heat,
+        position,
+        direction_counter,
+        direction,
+    }) = pq.pop()
+    {
         // reach the ending_point
         if position == ending_point {
             return heat;
@@ -70,15 +77,28 @@ fn find_shortest_path(
             continue;
         }
 
+        let prev_direction = direction;
         // find the next point by direction
         for (dx, dy) in DIRECTIONS {
+            let direction = (dx, dy);
             // can't reverse direction
             match prev_direction {
-                UP if (dx, dy) == DOWN => continue,
-                DOWN if (dx, dy) == UP => continue,
-                LEFT if (dx, dy) == RIGHT => continue,
-                RIGHT if (dx, dy) == LEFT => continue,
+                UP if direction == DOWN => continue,
+                DOWN if direction == UP => continue,
+                LEFT if direction == RIGHT => continue,
+                RIGHT if direction == LEFT => continue,
                 _ => (),
+            }
+
+            let mut direction_counter = direction_counter;
+            // we can only go straight for MAX_STRAIGHT_STEPS
+            if prev_direction == direction {
+                if direction_counter > MAX_STRAIGHT_STEPS {
+                    continue;
+                }
+                direction_counter += 1;
+            } else {
+                direction_counter = 1;
             }
 
             let (x, y) = (position.0 as isize + dx, position.1 as isize + dy);
@@ -86,24 +106,16 @@ fn find_shortest_path(
             if x < 0 || x >= grid_x_len || y < 0 || y >= grid_y_len {
                 continue;
             }
-
-            let point_heat = grid[x as usize][y as usize] as usize;
+            let (x, y) = (x as usize, y as usize);
+            let point_heat = grid[x][y] as usize;
             let next = State {
                 heat: heat + point_heat,
-                position: (x as usize, y as usize),
+                position: (x, y),
+                direction,
+                direction_counter,
             };
-            if next.heat < distance[next.position.0][next.position.1] {
-                // we can only go straight for MAX_STRAIGHT_STEPS
-                if prev_direction == (dx, dy) {
-                    if prev_direction_counter > MAX_STRAIGHT_STEPS {
-                        continue;
-                    }
-                    prev_direction_counter += 1;
-                } else {
-                    prev_direction = (dx, dy);
-                    prev_direction_counter = 1;
-                }
 
+            if next.heat < distance[x][y] {
                 // enqueue the least heat point
                 pq.push(next);
                 distance[next.position.0][next.position.1] = next.heat;

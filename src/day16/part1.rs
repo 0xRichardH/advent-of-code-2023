@@ -2,8 +2,8 @@ use std::collections::HashSet;
 
 const UP: (i32, i32) = (-1, 0);
 const DOWN: (i32, i32) = (1, 0);
-const LEFT: (i32, i32) = (0, -1);
 const RIGHT: (i32, i32) = (0, 1);
+const LEFT: (i32, i32) = (0, -1);
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 enum Direction {
