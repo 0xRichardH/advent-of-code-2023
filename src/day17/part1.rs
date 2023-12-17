@@ -1,4 +1,4 @@
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
 
 const MAX_STRAIGHT_STEPS: usize = 3;
 const UP: (isize, isize) = (-1, 0);
@@ -30,6 +30,23 @@ impl PartialOrd for State {
     }
 }
 
+#[derive(Eq, PartialEq, Hash)]
+struct SeenKey {
+    position: (usize, usize),
+    direction: (isize, isize),
+    direction_counter: usize,
+}
+
+impl From<State> for SeenKey {
+    fn from(s: State) -> Self {
+        Self {
+            position: s.position,
+            direction: s.direction,
+            direction_counter: s.direction_counter,
+        }
+    }
+}
+
 pub fn process_data(input: &str) -> usize {
     let grid = input
         .lines()
@@ -47,53 +64,43 @@ fn find_shortest_path(
     starting_point: (usize, usize),
     ending_point: (usize, usize),
 ) -> usize {
-    let mut distance = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
+    let mut seen = HashSet::<SeenKey>::new();
     let mut pq = BinaryHeap::<State>::new();
-    pq.push(State {
+    let start_state = State {
         heat: 0,
         position: starting_point,
         direction: RIGHT,
         direction_counter: 1,
-    });
-    distance[starting_point.0][starting_point.1] = 0;
+    };
+    pq.push(start_state);
 
     let grid_x_len = grid.len() as isize;
     let grid_y_len = grid[0].len() as isize;
 
-    while let Some(State {
-        heat,
-        position,
-        direction_counter,
-        direction,
-    }) = pq.pop()
-    {
+    while let Some(state) = pq.pop() {
         // reach the ending_point
-        if position == ending_point {
-            return heat;
+        if state.position == ending_point {
+            return state.heat;
         }
 
-        // skip the most heaty point
-        if heat > distance[position.0][position.1] {
+        if !seen.insert(SeenKey::from(state)) {
             continue;
         }
 
-        let prev_direction = direction;
+        let prev_direction = state.direction;
         // find the next point by direction
-        for (dx, dy) in DIRECTIONS {
-            let direction = (dx, dy);
+        for direction in DIRECTIONS {
+            let (dx, dy) = direction;
             // can't reverse direction
-            match prev_direction {
-                UP if direction == DOWN => continue,
-                DOWN if direction == UP => continue,
-                LEFT if direction == RIGHT => continue,
-                RIGHT if direction == LEFT => continue,
-                _ => (),
+            if prev_direction == (-dx, -dy) {
+                continue;
             }
 
-            let mut direction_counter = direction_counter;
             // we can only go straight for MAX_STRAIGHT_STEPS
+            let mut direction_counter = state.direction_counter;
+
             if prev_direction == direction {
-                if direction_counter > MAX_STRAIGHT_STEPS {
+                if direction_counter >= MAX_STRAIGHT_STEPS {
                     continue;
                 }
                 direction_counter += 1;
@@ -101,25 +108,25 @@ fn find_shortest_path(
                 direction_counter = 1;
             }
 
-            let (x, y) = (position.0 as isize + dx, position.1 as isize + dy);
+            let (x, y) = (
+                state.position.0 as isize + dx,
+                state.position.1 as isize + dy,
+            );
             // check the bound
-            if x < 0 || x >= grid_x_len || y < 0 || y >= grid_y_len {
+            if !(0..grid_x_len).contains(&x) || !(0..grid_y_len).contains(&y) {
                 continue;
             }
+
             let (x, y) = (x as usize, y as usize);
             let point_heat = grid[x][y] as usize;
             let next = State {
-                heat: heat + point_heat,
+                heat: state.heat + point_heat,
                 position: (x, y),
                 direction,
                 direction_counter,
             };
 
-            if next.heat < distance[x][y] {
-                // enqueue the least heat point
-                pq.push(next);
-                distance[next.position.0][next.position.1] = next.heat;
-            }
+            pq.push(next);
         }
     }
 
