@@ -24,22 +24,20 @@ enum Direction {
 struct Dig {
     direction: Direction,
     meters: usize,
-    color: String,
+    _color: String,
 }
 
 type Position = (isize, isize);
-type Point = (usize, usize);
 
 pub fn process_data(input: &str) -> usize {
     let dig_plan = input
-        .trim()
         .lines()
         .flat_map(|l| Dig::try_from(l).ok())
         .collect::<Vec<_>>();
 
     let (points, boundary_points_count) = get_points(&dig_plan);
-
-    dbg!(&points);
+    dbg!(input.lines().count());
+    dbg!(points.len());
 
     let area = calculate_area(&points);
     let interior = calculate_interior(area, boundary_points_count);
@@ -47,11 +45,10 @@ pub fn process_data(input: &str) -> usize {
     boundary_points_count + interior
 }
 
-fn get_points(dig_plan: &[Dig]) -> (Vec<Point>, usize) {
+fn get_points(dig_plan: &[Dig]) -> (Vec<Position>, usize) {
     let mut boundary_points_count = 0;
     let mut current_point = (0, 0);
     let mut points = Vec::new();
-    points.push(current_point);
 
     for d in dig_plan {
         boundary_points_count += d.meters;
@@ -67,7 +64,7 @@ fn get_points(dig_plan: &[Dig]) -> (Vec<Point>, usize) {
 
 // Shoelace formula
 // https://en.wikipedia.org/wiki/Shoelace_formula
-fn calculate_area(points: &[Point]) -> usize {
+fn calculate_area(points: &[Position]) -> usize {
     let mut xy = 0;
     let mut yx = 0;
     for pp in points.windows(2) {
@@ -77,16 +74,13 @@ fn calculate_area(points: &[Point]) -> usize {
         yx += y1 * x2;
     }
 
-    dbg!((xy as f64 - yx as f64).abs() / 2f64);
-
-    (xy as isize - yx as isize).unsigned_abs() / 2
+    (xy - yx).unsigned_abs() / 2
 }
 
 // Pick's theorem
 // https://en.wikipedia.org/wiki/Pick%27s_theorem
 fn calculate_interior(area: usize, boundary_points_count: usize) -> usize {
-    dbg!(boundary_points_count);
-    area - boundary_points_count / 2 + 1
+    area - (boundary_points_count / 2) + 1
 }
 
 impl TryFrom<&str> for Dig {
@@ -100,15 +94,12 @@ impl TryFrom<&str> for Dig {
 }
 
 impl Dig {
-    fn next_point(&self, current: Point) -> Option<Point> {
-        let (x, y) = (current.0 as isize, current.1 as isize);
+    fn next_point(&self, current: Position) -> Option<Position> {
+        let (x, y) = current;
         let (dx, dy) = self.direction.position();
         let (i, j) = (x + dx * self.meters as isize, y + dy * self.meters as isize);
-        if i < 0 || j < 0 {
-            return None;
-        }
 
-        Some((i as usize, j as usize))
+        Some((i, j))
     }
 }
 
@@ -153,7 +144,7 @@ fn parse_single_plan(input: &str) -> IResult<&str, Dig> {
     let dig = Dig {
         direction: direction.into(),
         meters: meters as usize,
-        color,
+        _color: color,
     };
 
     Ok((input, dig))

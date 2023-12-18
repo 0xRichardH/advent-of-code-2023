@@ -389,5 +389,5 @@ fn run_day17_part2() {
 fn run_day18_part1() {
     let input_strings = include_str!("../inputs/day18-input.txt");
     let result = day18::part1::process_data(input_strings);
-    println!("daily18-part1 = {}", result); //
+    println!("daily18-part1 = {}", result); // 70253
 }
