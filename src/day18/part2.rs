@@ -1,8 +1,8 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use nom::{
     bytes::complete::{is_a, tag},
     character::complete::{self, hex_digit1, space1},
-    sequence::{delimited, tuple},
+    sequence::{delimited, preceded, tuple},
     IResult, Parser,
 };
 
@@ -24,7 +24,6 @@ enum Direction {
 struct Dig {
     direction: Direction,
     meters: usize,
-    _color: String,
 }
 
 type Position = (isize, isize);
@@ -85,8 +84,26 @@ impl TryFrom<&str> for Dig {
     type Error = anyhow::Error;
 
     fn try_from(input: &str) -> Result<Self, Self::Error> {
-        let (_, dig) =
+        let (_, hex_digit) =
             parse_single_plan(input).map_err(|e| anyhow!("failed to parse plan: {}", e))?;
+
+        let hex_digit_chars = hex_digit.chars().collect::<Vec<_>>();
+
+        let direction_result = hex_digit_chars.last();
+        let meters_str = hex_digit_chars[0..hex_digit_chars.len() - 1]
+            .iter()
+            .collect::<String>();
+        let meters = usize::from_str_radix(&meters_str, 16).context("parser meters failed")?;
+
+        if direction_result.is_none() {
+            return Err(anyhow!("failed to parse direction"));
+        }
+
+        let dig = Dig {
+            direction: Direction::from(direction_result.unwrap()),
+            meters,
+        };
+
         Ok(dig)
     }
 }
@@ -101,13 +118,13 @@ impl Dig {
     }
 }
 
-impl From<&str> for Direction {
-    fn from(dir: &str) -> Self {
+impl From<&char> for Direction {
+    fn from(dir: &char) -> Self {
         match dir {
-            "U" => Direction::Up,
-            "D" => Direction::Down,
-            "L" => Direction::Left,
-            "R" => Direction::Right,
+            '0' => Direction::Right,
+            '1' => Direction::Down,
+            '2' => Direction::Left,
+            '3' => Direction::Up,
             _ => Direction::None,
         }
     }
@@ -125,27 +142,14 @@ impl Direction {
     }
 }
 
-fn parse_single_plan(input: &str) -> IResult<&str, Dig> {
-    let (input, (direction, _, meters, _, color)) = tuple((
-        is_a("UDLR"),
-        space1,
-        complete::u32,
-        space1,
-        delimited(
-            tag("("),
-            tuple((tag("#"), hex_digit1)).map(|(hash, hex_digit)| format!("{}{}", hash, hex_digit)),
-            tag(")"),
-        ),
-    ))
+fn parse_single_plan(input: &str) -> IResult<&str, &str> {
+    let (input, (_, hex_digit)) = preceded(
+        tuple((is_a("UDLR"), space1, complete::u32, space1)),
+        delimited(tag("("), tuple((tag("#"), hex_digit1)), tag(")")),
+    )
     .parse(input)?;
 
-    let dig = Dig {
-        direction: direction.into(),
-        meters: meters as usize,
-        _color: color,
-    };
-
-    Ok((input, dig))
+    Ok((input, hex_digit))
 }
 
 #[cfg(test)]
@@ -168,6 +172,6 @@ R 2 (#7807d2)
 U 3 (#a77fa3)
 L 2 (#015232)
 U 2 (#7a21e3)";
-        assert_eq!(62, process_data(input));
+        assert_eq!(952408144115, process_data(input));
     }
 }
