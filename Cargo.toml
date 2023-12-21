@@ -76,6 +76,9 @@ day18 = ["day18-part1", "day18-part2"]
 day19-part1 = []
 day19-part2 = []
 day19 = ["day19-part1", "day19-part2"]
+day20-part1 = []
+day20-part2 = []
+day20 = ["day20-part1", "day20-part2"]
 all = [
   "day01",
   "day02",
@@ -96,6 +99,7 @@ all = [
   "day17",
   "day18",
   "day19",
+  "day20",
 ]
 
 [profile.flamegraph]
@@ -176,4 +180,8 @@ harness = false
 
 [[bench]]
 name = "day19"
+harness = false
+
+[[bench]]
+name = "day20"
 harness = false
