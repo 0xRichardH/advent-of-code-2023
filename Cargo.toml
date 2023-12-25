@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
+indexmap = "2.1.0"
 nom = "7.1.3"
 nom-supreme = "0.8.0"
 num = "0.4.1"
@@ -85,6 +86,9 @@ day21 = ["day21-part1", "day21-part2"]
 day22-part1 = []
 day22-part2 = []
 day22 = ["day22-part1", "day22-part2"]
+day23-part1 = []
+day23-part2 = []
+day23 = ["day23-part1", "day23-part2"]
 all = [
   "day01",
   "day02",
@@ -108,6 +112,7 @@ all = [
   "day20",
   "day21",
   "day22",
+  "day23",
 ]
 
 [profile.flamegraph]
@@ -196,4 +201,8 @@ harness = false
 
 [[bench]]
 name = "day22"
+harness = false
+
+[[bench]]
+name = "day23"
 harness = false
