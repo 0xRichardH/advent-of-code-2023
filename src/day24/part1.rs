@@ -1,34 +1,33 @@
 #![allow(dead_code)]
 
-use itertools::iproduct;
-
 #[derive(Debug)]
 struct Hailstone {
-    x: isize,
-    y: isize,
-    z: isize,
-    vx: isize,
-    vy: isize,
-    vz: isize,
+    x: f64,
+    y: f64,
+    z: f64,
+    vx: f64,
+    vy: f64,
+    vz: f64,
 }
 
-pub fn process_data(input: &str, min: isize, max: isize) -> usize {
+pub fn process_data(input: &str, min: usize, max: usize) -> usize {
     let hails = input
         .trim()
         .lines()
         .flat_map(Hailstone::try_from)
         .collect::<Vec<_>>();
 
-    println!("{:?}", hails);
+    let mut counter = 0;
 
-    iproduct!(hails.iter(), hails.iter().skip(1)).fold(0, |acc, (a, b)| {
-        println!("{:?} {:?}", a, b);
-        if a.in_area(b, min, max).unwrap_or(false) {
-            acc + 1
-        } else {
-            acc
+    for i in 0..hails.len() {
+        for j in i + 1..hails.len() {
+            if hails[i].in_area(&hails[j], min as f64, max as f64) {
+                counter += 1;
+            }
         }
-    })
+    }
+
+    counter
 }
 
 impl TryFrom<&str> for Hailstone {
@@ -45,32 +44,32 @@ impl TryFrom<&str> for Hailstone {
         let x = position
             .next()
             .ok_or_else(|| "Invalid x position".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid x position".to_string())?;
         let y = position
             .next()
             .ok_or_else(|| "Invalid y position".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid y position".to_string())?;
         let z = position
             .next()
             .ok_or_else(|| "Invalid z position".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid z position".to_string())?;
         let vx = velocity
             .next()
             .ok_or_else(|| "Invalid x velocity".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid x velocity".to_string())?;
         let vy = velocity
             .next()
             .ok_or_else(|| "Invalid y velocity".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid y velocity".to_string())?;
         let vz = velocity
             .next()
             .ok_or_else(|| "Invalid z velocity".to_string())?
-            .parse::<isize>()
+            .parse::<f64>()
             .map_err(|_| "Invalid z velocity".to_string())?;
 
         Ok(Self {
@@ -85,7 +84,7 @@ impl TryFrom<&str> for Hailstone {
 }
 
 impl Hailstone {
-    fn in_area(&self, stone: &Hailstone, min: isize, max: isize) -> Option<bool> {
+    fn in_area(&self, stone: &Hailstone, min: f64, max: f64) -> bool {
         let x1 = self.x;
         let x2 = self.x + self.vx;
         let x3 = stone.x;
@@ -105,19 +104,19 @@ impl Hailstone {
         let c2 = a2 * x3 + b2 * y3;
 
         let determinant = a1 * b2 - a2 * b1;
-        let x = (b2 * c1 - b1 * c2).checked_div(determinant)?;
-        let y = (a1 * c2 - a2 * c1).checked_div(determinant)?;
+        if determinant == 0f64 {
+            return false;
+        }
+
+        let x = (b2 * c1 - b1 * c2) / determinant;
+        let y = (a1 * c2 - a2 * c1) / determinant;
 
         let area = min..=max;
 
         let valid_a = (x > x1) == (x2 > x1);
         let valid_b = (x > x3) == (x4 > x3);
 
-        if area.contains(&x) && area.contains(&y) && valid_a && valid_b {
-            println!("{} {}", x, y);
-        }
-
-        Some(area.contains(&x) && area.contains(&y) && valid_a && valid_b)
+        area.contains(&x) && area.contains(&y) && valid_a && valid_b
     }
 }
 
