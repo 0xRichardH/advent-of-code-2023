@@ -11,7 +11,7 @@ bench-all:
     cargo bench -q > benchmarks.txt
 
 watch day:
-  cargo watch -qcs "just test {{day}}" -s "just bench {{day}}"
+  cargo watch -w src -w benches -qcs "just test {{day}}" -s "just bench {{day}}"
 
 flamegraph feature:
   cargo flamegraph --profile flamegraph --root --features {{feature}} -o flamegraphs/{{feature}}.svg

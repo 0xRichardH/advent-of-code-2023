@@ -146,6 +146,9 @@ fn main() -> anyhow::Result<()> {
     #[cfg(feature = "day24-part2")]
     run_day24_part2();
 
+    #[cfg(feature = "day25")]
+    run_day25()?;
+
     Ok(())
 }
 
@@ -510,4 +513,12 @@ fn run_day24_part2() {
     let input_strings = include_str!("../inputs/day24-input.txt");
     let result = day24::part2::process_data(input_strings);
     println!("daily24-part2 = {:?}", result); // 781390555762385
+}
+
+#[cfg(feature = "day25")]
+fn run_day25() -> anyhow::Result<()> {
+    let input_strings = include_str!("../inputs/day25-input.txt");
+    let result = day25::process_data(input_strings)?;
+    println!("daily25 = {}", result); // 598120
+    Ok(())
 }
