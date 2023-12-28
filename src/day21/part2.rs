@@ -93,9 +93,6 @@ fn finding(grid: &[Vec<char>], start: (isize, isize), steps: isize) -> isize {
 
         for (di, dj) in DIRECTIONS {
             let (ni, nj) = (i as i32 + di, j as i32 + dj);
-            // if ni < 0 || nj < 0 || ni >= grid.len() as i32 || nj >= grid[0].len() as i32 {
-            //     continue;
-            // }
 
             let point = (ni as isize, nj as isize);
             q.push_back((point, steps - 1));
